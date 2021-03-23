@@ -1,0 +1,31 @@
+{
+  "name": "mongostore",
+  "version": "1.0.0",
+  "description": "A full Node.js backend for Serverless applications inspired by Google Firebase",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "/dist"
+  ],
+  "scripts": {
+    "build": "tsc"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/janwuesten/Mongostore.git"
+  },
+  "keywords": [
+    "mongo",
+    "mongodb",
+    "serverless"
+  ],
+  "author": "Jan Wüsten",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/janwuesten/Mongostore/issues"
+  },
+  "homepage": "https://github.com/janwuesten/Mongostore#readme",
+  "devDependencies": {
+    "typescript": "^4.2.3"
+  }
+}
