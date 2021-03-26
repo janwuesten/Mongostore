@@ -1,0 +1,15 @@
+{
+    "compilerOptions": {
+      "module": "commonjs",
+      "target": "es2015",
+      "declaration": true,
+      "esModuleInterop": true,
+      "outDir": "./server_dist"
+    },
+    "include": [
+      "server_src/**/*",
+      "config.ts",
+      "rules.ts",
+      "functions/**/*",
+    ]
+}
