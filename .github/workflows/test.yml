@@ -1,10 +1,10 @@
 name: TEST-CI
 
 on:
-  #push:
-  #  branches: [ main ]
-  #pull_request:
-  #  branches: [ main ]
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -34,7 +34,7 @@ jobs:
         working-directory: mongostore
 
       - name: Build lib
-        run: npm build
+        run: npm run build
         working-directory: mongostore
         
       - name: Start Mongostore server
