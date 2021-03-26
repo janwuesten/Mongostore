@@ -12,6 +12,6 @@ async function runTest() {
         console.info(doc._id);
     });*/
     var res = await mongostore.store().collection("test").add({test: true, num: 1000});
-    await mongostore.store().collection("test").doc(res.documents[0]._id).set({test: false});
+    await mongostore.store().collection("test").doc(res.documents[0]._id).update({test: false, timestamp: mongostore.store().fields().serverTimestamp()});
 }
 runTest();

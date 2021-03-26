@@ -30,7 +30,6 @@ async function action (store: Db, query: core.Query, auth: null, req: core.Reque
     if(searchForId) {
         const beforeData = await store.collection(query.collection as string).findOne(mongoQuery, mongoOptions);
         if(beforeData != null) {
-            afterData._id = new ObjectId(beforeData._id);
             var rulesRequest = new MongoStoreRulesRequest();
             rulesRequest.document = beforeData;
             rulesRequest.update = afterData;
@@ -63,7 +62,6 @@ async function action (store: Db, query: core.Query, auth: null, req: core.Reque
         if ((await cursor.count()) != 0) {
             while(await cursor.hasNext()) {
                 const beforeData = await cursor.next();
-                afterData._id = new ObjectId(beforeData._id);
                 var rulesRequest = new MongoStoreRulesRequest();
                 rulesRequest.document = beforeData;
                 rulesRequest.update = afterData;
