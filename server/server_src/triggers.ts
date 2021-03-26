@@ -45,9 +45,9 @@ class MongoStoreTriggers {
         }
     }
     runDocumentDeletedTriggers(collection: string, store: Db, deleted: Document) {
-        for(var index in this.documentDelete) {
-            if(this.documentDelete[index].collection == collection) {
-                this.documentDelete[index].trigger(store, deleted);
+        for(var index in this.documentDeleteTriggers) {
+            if(this.documentDeleteTriggers[index].collection == collection) {
+                this.documentDeleteTriggers[index].trigger(store, deleted);
             }
         }
     }
