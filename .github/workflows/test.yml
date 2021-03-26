@@ -32,11 +32,15 @@ jobs:
       - name: Install lib deps
         run: npm install
         working-directory: mongostore
+
+      - name: Build lib
+        run: npm build
+        working-directory: mongostore
         
       - name: Start Mongostore server
         run: (npm run start&)
         working-directory: server
-        
+
       - name: Basic test
         run: node basic_io.js
         working-directory: mongostore/test
