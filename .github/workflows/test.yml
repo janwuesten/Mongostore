@@ -41,6 +41,10 @@ jobs:
         run: (npm run start&)
         working-directory: server
 
-      - name: Basic test
+      - name: Test connection
+        run: node connection_test.js
+        working-directory: mongostore/test
+
+      - name: Test basic IO
         run: node basic_io.js
         working-directory: mongostore/test

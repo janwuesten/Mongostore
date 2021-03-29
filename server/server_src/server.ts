@@ -78,5 +78,10 @@ server.get('*', function(req, res){
 });
 // Mongostore APIs
 server.post("/mongostore/store", storeHandler);
+server.post("/mongostore/info", (req, res) => {
+    res.send({
+        response: "ok"
+    });
+});
 server.listen(config.port);
 console.log("MONGOSTORE: Server started on port " + config.port);
