@@ -24,7 +24,7 @@ export class MongoStore {
 export class MongoStoreConfig {
     serverUrl: string;
     constructor() {
-        this.serverUrl = "http://localhost";
+        this.serverUrl = "http://localhost:5000";
     }
 }
 export default new MongoStore();

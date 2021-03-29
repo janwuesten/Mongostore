@@ -1,7 +1,7 @@
 const mongostore = require('../dist/index').default;
 
 mongostore.init({
-    serverUrl: "http://localhost"
+    serverUrl: "http://localhost:5000"
 });
 var retries = 20;
 async function runTest() {
