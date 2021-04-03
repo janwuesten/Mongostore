@@ -1,11 +1,7 @@
-import { Db, Document, ObjectId } from 'mongodb';
+import { Db } from 'mongodb';
 import * as core from 'express-serve-static-core';
-import config from '../../../config';
-import rules from '../../../rules';
 import { MongoStoreResponse } from '..';
-import { MongoStoreRulesRequest, MongoStoreRulesResponse } from '../../server';
-import decode from '../decoder';
-import triggers from '../../triggers';
+import mongostore from '../index';
 
 async function action (store: Db, query: core.Query, auth: null, req: core.Request, res: core.Response): Promise<MongoStoreResponse> { 
     var response: MongoStoreResponse = new MongoStoreResponse();
@@ -14,79 +10,11 @@ async function action (store: Db, query: core.Query, auth: null, req: core.Reque
         return response;
     }
     var searchForId = query.hasOwnProperty("document");
-    var mongoQuery;
+    var afterData = JSON.parse(query.data as string);
     if(searchForId) {
-        mongoQuery = {
-            _id: new ObjectId(query.document as string)
-        };
+        response = await mongostore.update(query.collection as string, query.document as string, afterData, null, store);
     }else{
-        mongoQuery = JSON.parse(query.query as string);
-    }
-    var afterData = decode(JSON.parse(query.data as string));
-    const mongoOptions = {
-        //sort: { rating: -1 },
-        //projection: { _id: 0, title: 1, imdb: 1 },
-    };
-    if(searchForId) {
-        const beforeData = await store.collection(query.collection as string).findOne(mongoQuery, mongoOptions);
-        if(beforeData != null) {
-            var rulesRequest = new MongoStoreRulesRequest();
-            rulesRequest.document = beforeData;
-            rulesRequest.update = afterData;
-            rulesRequest.id = beforeData._id;
-            rulesRequest.collection = query.collection as string;
-            var rulesResponse = new MongoStoreRulesResponse();
-            try{
-                await rules.storeRules(store, rulesRequest, rulesResponse);
-            }catch(err){
-                if(config.verbose) {
-                    console.error(err);
-                }else{
-                    console.log("MONGOSTORE: Crashed /store ruleset. Use verbose mode for detailed information");
-                }
-                rulesResponse = new MongoStoreRulesResponse()
-            };
-            if(rulesResponse.update) {
-                response.documents.push(afterData);
-                await store.collection(query.collection as string).updateOne(mongoQuery, {
-                    $set: afterData
-                });
-                triggers.runDocumentUpdateTriggers(query.collection as string, store, beforeData, afterData);
-            }else{
-                response.response = "invalid_permissions";
-                return response;
-            }
-        }
-    }else{
-        const cursor = await store.collection(query.collection as string).find(mongoQuery, mongoOptions);
-        if ((await cursor.count()) != 0) {
-            while(await cursor.hasNext()) {
-                const beforeData = await cursor.next();
-                var rulesRequest = new MongoStoreRulesRequest();
-                rulesRequest.document = beforeData;
-                rulesRequest.update = afterData;
-                rulesRequest.id = beforeData._id;
-                rulesRequest.collection = query.collection as string;
-                var rulesResponse = new MongoStoreRulesResponse();
-                try{
-                    await rules.storeRules(store, rulesRequest, rulesResponse);
-                }catch(err){
-                    if(config.verbose) {
-                        console.error(err);
-                    }else{
-                        console.log("MONGOSTORE: Crashed /store ruleset. Use verbose mode for detailed information");
-                    }
-                    rulesResponse = new MongoStoreRulesResponse()
-                };
-                if(rulesResponse.updateByFind) {
-                    response.documents.push(afterData);
-                    await store.collection(query.collection as string).updateOne({_id: new ObjectId(beforeData._id)}, {
-                        $set: afterData
-                    });
-                    triggers.runDocumentUpdateTriggers(query.collection as string, store, beforeData, afterData);
-                }
-            }
-        }
+        response = await mongostore.update(query.collection as string, JSON.parse(query.query as string), afterData, null, store);
     }
     return response;
 };

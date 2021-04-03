@@ -1,4 +1,5 @@
 import triggers from '../server_src/triggers';
+import mongostore from '../server_src/store';
 
 triggers.documentGet("test", async (store, document) => {
     console.info("documentGet");

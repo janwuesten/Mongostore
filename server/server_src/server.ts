@@ -1,7 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import config from '../config';
-import storeHandler from './store';
+import {MongoStoreHandler} from './store';
+import {MongoStoreAuthHandler} from './auth';
 import path from 'path';
 import { Db, Document } from 'mongodb';
 import '../functions/triggers';
@@ -11,6 +12,10 @@ export class MongoStoreConfig {
     mongodb: {
         url: string;
         database: string;
+    };
+    auth?: {
+        authCollectionPrefix: string;
+        usernameAuth: boolean;
     };
     verbose?: boolean = false;
 };
@@ -77,7 +82,8 @@ server.get('*', function(req, res){
     res.sendFile(path.join(staticPath, "index.html"));
 });
 // Mongostore APIs
-server.post("/mongostore/store", storeHandler);
+server.post("/mongostore/store", new MongoStoreHandler().handler);
+server.post("/mongostore/auth", new MongoStoreAuthHandler().handler);
 server.post("/mongostore/info", (req, res) => {
     res.send({
         response: "ok"

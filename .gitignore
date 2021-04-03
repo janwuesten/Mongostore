@@ -16,3 +16,5 @@ dist
 server_dist
 .cache/
 .vscode/
+*.key
+*.key.pub
