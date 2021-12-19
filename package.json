@@ -1,6 +1,6 @@
 {
   "name": "mongostore",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "JavaScript library to connect your WebApp or Node.JS Server to your Mongostore server",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
