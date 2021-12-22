@@ -12,13 +12,13 @@ The Node.js client library for the [Mongostore server](https://github.com/janwue
 To start creating a Mongostore client you need to install the client library to a Node.js project by installing the mongostore dependency. Using Typescript is not required but strongly recommended. All guides will use Typescript.
 
 ```cmd
-npm install mongostore
+npm install @janwuesten/mongostore
 ```
 
 When using Mongostore as a Hosting service for your project, the Mongostore client library will automatically be configured to use the right Mongostore server. If you use the Mongostore client library on a different domain than the Mongostore server or the client isn't a Website (e.g. a Electron app) you need to configure the client library to connect to the right Mongostore server like so:
 
 ```ts
-import mongostore from "mongostore"
+import mongostore from "@janwuesten/mongostore"
 
 mongostore.init({
     // Your Mongostore server URL
