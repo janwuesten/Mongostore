@@ -18,7 +18,7 @@ npm install mongostore
 When using Mongostore as a Hosting service for your project, the Mongostore client library will automatically be configured to use the right Mongostore server. If you use the Mongostore client library on a different domain than the Mongostore server or the client isn't a Website (e.g. a Electron app) you need to configure the client library to connect to the right Mongostore server like so:
 
 ```ts
-import mongostore from "mongostore-server"
+import mongostore from "mongostore"
 
 mongostore.init({
     // Your Mongostore server URL
