@@ -1,164 +1,208 @@
-import axios from 'axios';
-import { MongoStore } from './index';
+import axios from 'axios'
+import { MongoStoreClient } from './index'
 
-export class StoreResponse {
-    response: string;
-    documents: [];
-    constructor(data) {
-        if(data.response == "ok") {
-            this.response = data.response;
-            this.documents = data.documents;
-        }else{
-            this.response = data.response;
-            this.documents = [];
-        }
+export type MongoStoreSearchOptions = {
+    searchForId: boolean
+}
+export class MongoStoreDocument {
+    private _collection: MongoStoreCollection
+    private _data: Record<string, any>
+    constructor(collection: MongoStoreCollection, data: Record<string, any>) {
+        this._collection = collection
+        this._data = data
+    }
+
+    get id(): string {
+        return this._data._id
+    }
+    get collection(): MongoStoreCollection {
+        return this._collection
+    }
+    get ref(): MongoStoreQuery {
+        return this._collection.doc(this.id)
+    }
+    data(): Record<string, any> {
+        return this._data
     }
 }
-export class StoreQuery {
-    collection: StoreCollection;
-    query: {[key: string]: any};
-    constructor(query: {[key: string]: any}, searchOptions: StoreSearchOptions, collection: StoreCollection) {
-        this.collection = collection;
-        this.query = {};
+export class MongoStoreDocumentResponse {
+    private _response: string
+    private _documents: []
+    private _collection: MongoStoreCollection
+    constructor(data: Record<string, any>, collection: MongoStoreCollection) {
+        this._collection = collection
+        if(data.response == "ok") {
+            this._response = data.response
+            this._documents = data.documents
+        }else{
+            this._response = data.response
+            this._documents = []
+        }
+    }
+
+    get success(): boolean {
+        return this._response === "ok"
+    }
+    get docs(): MongoStoreDocument[] {
+        let docs: MongoStoreDocument[] = []
+        for(let doc of this._documents) {
+            docs.push(new MongoStoreDocument(this._collection, doc))
+        }
+        return docs
+    }
+    get doc(): MongoStoreDocument {
+        if(this.docs.length >= 1) {
+            return this.docs[0]
+        }
+        return null
+    }
+
+    exists(): boolean {
+        return this.docs.length >= 1
+    }
+}
+export class MongoStoreQuery {
+    private _collection: MongoStoreCollection
+    private _query: Record<string, any>
+    constructor(query: Record<string, any>, searchOptions: MongoStoreSearchOptions, collection: MongoStoreCollection) {
+        this._collection = collection
+        this._query = {}
         if(searchOptions.searchForId) {
-            this.query = {
+            this._query = {
                 collection: collection.collectionID,
                 document: query._id
-            };
+            }
         }else{
-            this.query = {
-                collection: this.collection.collectionID,
+            this._query = {
+                collection: this._collection.collectionID,
                 query: query
-            };
+            }
         }
     }
-    async get(): Promise<StoreResponse> {
-        var postParam = this.query;
-        postParam.action = "get";
-        postParam.query = JSON.stringify(postParam.query);
+    async get(): Promise<MongoStoreDocumentResponse> {
+        let postParam = this._query
+        postParam.action = "get"
+        postParam.query = JSON.stringify(postParam.query)
         try{
-            const response = await axios.post(this.collection.store.store.config.serverUrl + "/mongostore/store", postParam);
-            return new StoreResponse(response.data);
+            const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
+            return new MongoStoreDocumentResponse(response.data, this._collection)
         }catch(err) {
-            return new StoreResponse({response: "connection_error", error: err});
+            return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
         }
     }
-    async set(): Promise<StoreResponse> {
-        var postParam = this.query;
-        postParam.action = "set";
-        postParam.query = JSON.stringify(postParam.query);
+    async set(): Promise<MongoStoreDocumentResponse> {
+        let postParam = this._query
+        postParam.action = "set"
+        postParam.query = JSON.stringify(postParam.query)
         try{
-            const response = await axios.post(this.collection.store.store.config.serverUrl + "/mongostore/store", postParam);
-            return new StoreResponse(response.data);
+            const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
+            return new MongoStoreDocumentResponse(response.data, this._collection)
         }catch(err) {
-            return new StoreResponse({response: "connection_error", error: err});
+            return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
         }
     }
-    async update(data: {[key: string]: any}): Promise<StoreResponse> {
-        var postParam = this.query;
-        postParam.action = "update";
-        postParam.data = JSON.stringify(data);
-        postParam.query = JSON.stringify(postParam.query);
+    async update(data: {[key: string]: any}): Promise<MongoStoreDocumentResponse> {
+        let postParam = this._query
+        postParam.action = "update"
+        postParam.data = JSON.stringify(data)
+        postParam.query = JSON.stringify(postParam.query)
         try{
-            const response = await axios.post(this.collection.store.store.config.serverUrl + "/mongostore/store", postParam);
-            return new StoreResponse(response.data);
+            const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
+            return new MongoStoreDocumentResponse(response.data, this._collection)
         }catch(err) {
-            return new StoreResponse({response: "connection_error", error: err});
+            return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
         }
     }
-    async delete(data: {[key: string]: any}): Promise<StoreResponse> {
-        var postParam = this.query;
-        postParam.action = "delete";
-        postParam.data = JSON.stringify(data);
-        postParam.query = JSON.stringify(postParam.query);
+    async delete(data: {[key: string]: any}): Promise<MongoStoreDocumentResponse> {
+        let postParam = this._query
+        postParam.action = "delete"
+        postParam.data = JSON.stringify(data)
+        postParam.query = JSON.stringify(postParam.query)
         try{
-            const response = await axios.post(this.collection.store.store.config.serverUrl + "/mongostore/store", postParam);
-            return new StoreResponse(response.data);
+            const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
+            return new MongoStoreDocumentResponse(response.data, this._collection)
         }catch(err) {
-            return new StoreResponse({response: "connection_error", error: err});
+            return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
         }
     }
-    where(field: string, search: string, find: any): StoreQuery {
-        if(!this.query.query.hasOwnProperty(field) || typeof this.query.query[field] !== "object") {
-            this.query.query[field] = {};
+    where(field: string, search: string, find: any): MongoStoreQuery {
+        if(!this._query.query.hasOwnProperty(field) || typeof this._query.query[field] !== "object") {
+            this._query.query[field] = {}
         }
         switch(search) {
             case "<":
-                this.query.query[field].$lt = find;
-                break;
+                this._query.query[field].$lt = find
+                break
             case "<=":
-                this.query.query[field].$lte = find;
-                break;
+                this._query.query[field].$lte = find
+                break
             case ">":
-                this.query.query[field].$gt = find;
-                break;
+                this._query.query[field].$gt = find
+                break
             case ">=":
-                this.query.query[field].$gte = find;
-                break;
+                this._query.query[field].$gte = find
+                break
             case "!=":
-                this.query.query[field].$ne = find;
-                break;
+                this._query.query[field].$ne = find
+                break
             case "in-array":
-                this.query.query[field].$in = find;
-                break;
+                this._query.query[field].$in = find
+                break
             case "not-in-array":
-                this.query.query[field].$nin = find;
-                break;
+                this._query.query[field].$nin = find
+                break
             case "=":
             case "==":
-                this.query.query[field].$eq = find;
-                break;
+                this._query.query[field].$eq = find
+                break
             default:
-                break;
+                break
         }
-        return this;
+        return this
     }
 }
-export class StoreSearchOptions {
-    searchForId: boolean
-}
-export class StoreCollection {
-    collectionID: string;
-    store: Store;
-    constructor(collectionID: string, store: Store) {
-        this.collectionID = collectionID;
-        this.store = store;
+export class MongoStoreCollection {
+    collectionID: string
+    store: MongoStore
+    constructor(collectionID: string, store: MongoStore) {
+        this.collectionID = collectionID
+        this.store = store
     }
-    doc(id: string): StoreQuery {
-        return new StoreQuery({_id: id}, {searchForId: true}, this);
+    doc(id: string): MongoStoreQuery {
+        return new MongoStoreQuery({_id: id}, {searchForId: true}, this)
     }
-    all(): StoreQuery {
-        return new StoreQuery({}, {searchForId: false}, this);
+    all(): MongoStoreQuery {
+        return new MongoStoreQuery({}, {searchForId: false}, this)
     }
-    query(query: {[key: string]: any}): StoreQuery {
-        return new StoreQuery(query, {searchForId: false}, this);
+    query(query: {[key: string]: any}): MongoStoreQuery {
+        return new MongoStoreQuery(query, {searchForId: false}, this)
     }
     where(field: string, search: string, find: any) {
-        return new StoreQuery({}, {searchForId: false}, this).where(field, search, find);
+        return new MongoStoreQuery({}, {searchForId: false}, this).where(field, search, find)
     }
-    async add(data: {[key: string]: any}): Promise<StoreResponse> {
+    async add(data: {[key: string]: any}): Promise<MongoStoreDocumentResponse> {
         try{
             const postData =  {
                 action: "add",
                 collection: this.collectionID,
                 data: JSON.stringify(data)
-            };
-            const response = await axios.post(this.store.store.config.serverUrl + "/mongostore/store", postData);
-            const mongoStoreResponse = new StoreResponse(response.data);
-            return mongoStoreResponse;
+            }
+            const response = await axios.post(this.store.store.config.serverUrl + "/mongostore/store", postData)
+            const mongoStoreResponse = new MongoStoreDocumentResponse(response.data, this)
+            return mongoStoreResponse
         }catch(err) {
-            return new StoreResponse({response: "connection_error", error: err});
+            return new MongoStoreDocumentResponse({response: "error", error: err}, this)
         }
     }
 }
-export class Store {
-    store: MongoStore;
-    constructor(ms: MongoStore) {
-        this.store = ms;
+export class MongoStore {
+    store: MongoStoreClient
+    constructor(ms: MongoStoreClient) {
+        this.store = ms
     }
-    collection(collectionID: string): StoreCollection {
-        return new StoreCollection(collectionID, this);
-    };
+    collection(collectionID: string): MongoStoreCollection {
+        return new MongoStoreCollection(collectionID, this)
+    }
     fields() {
         return {
             serverTimestamp() {

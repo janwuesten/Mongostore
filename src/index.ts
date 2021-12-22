@@ -1,30 +1,34 @@
-import {Store} from './store';
-import axios from 'axios';
+import {MongoStore} from './store'
+import axios from 'axios'
 
-export class MongoStore {
-    config: MongoStoreConfig;
+export class MongoStoreClient {
+    config: MongoStoreConfig
     constructor() {
-        this.config = new MongoStoreConfig();
+        this.config = new MongoStoreConfig()
     }
     init(config: MongoStoreConfig) {
-        this.config = config;
+        this.config = config
     }
-    store(): Store {
-        return new Store(this);
+    store(): MongoStore {
+        return new MongoStore(this)
     }
     async serverInfo(): Promise<{[key: string]: any}|null> {
         try{
-            var response = await axios.post(this.config.serverUrl + "/mongostore/info");
-            return response.data;
+            var response = await axios.post(this.config.serverUrl + "/mongostore/info")
+            return response.data
         }catch(err) {
-            return null;
+            return null
         }
     }
 }
 export class MongoStoreConfig {
-    serverUrl: string;
+    serverUrl: string
     constructor() {
-        this.serverUrl = "http://localhost:5000";
+        if(typeof location === "object") {
+            this.serverUrl = `${location.protocol}//${location.host}`;
+        }else{
+            this.serverUrl = "http://localhost:5000"
+        }
     }
 }
-export default new MongoStore();
+export default new MongoStoreClient()

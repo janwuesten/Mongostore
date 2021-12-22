@@ -9,11 +9,13 @@ async function runTest() {
             test: true,
             value: 10
         });
-        console.info(res);
-        if(res.documents.length >= 1) {
-            await mongostore.store().collection("test").doc(res.documents[0]._id).update({
+        if(res.exists()) {
+            let test = await res.doc.ref.update({
                 test: false
             });
+            console.log(test.docs);
+        }else{
+            console.error("Document does not exist");
         }
         //await mongostore.store().collection("test").all().delete();
         process.exit();
