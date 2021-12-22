@@ -90,9 +90,10 @@ export class MongoStoreQuery {
             return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
         }
     }
-    async set(): Promise<MongoStoreDocumentResponse> {
+    async set(data: Record<string, any> = {}): Promise<MongoStoreDocumentResponse> {
         let postParam = this._query
         postParam.action = "set"
+        postParam.data = JSON.stringify(data)
         postParam.query = JSON.stringify(postParam.query)
         try{
             const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
@@ -101,7 +102,7 @@ export class MongoStoreQuery {
             return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
         }
     }
-    async update(data: {[key: string]: any}): Promise<MongoStoreDocumentResponse> {
+    async update(data: Record<string, any> = {}): Promise<MongoStoreDocumentResponse> {
         let postParam = this._query
         postParam.action = "update"
         postParam.data = JSON.stringify(data)
@@ -113,10 +114,9 @@ export class MongoStoreQuery {
             return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
         }
     }
-    async delete(data: {[key: string]: any}): Promise<MongoStoreDocumentResponse> {
+    async delete(): Promise<MongoStoreDocumentResponse> {
         let postParam = this._query
         postParam.action = "delete"
-        postParam.data = JSON.stringify(data)
         postParam.query = JSON.stringify(postParam.query)
         try{
             const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
@@ -174,13 +174,13 @@ export class MongoStoreCollection {
     all(): MongoStoreQuery {
         return new MongoStoreQuery({}, {searchForId: false}, this)
     }
-    query(query: {[key: string]: any}): MongoStoreQuery {
+    query(query: Record<string, any>): MongoStoreQuery {
         return new MongoStoreQuery(query, {searchForId: false}, this)
     }
     where(field: string, search: string, find: any) {
         return new MongoStoreQuery({}, {searchForId: false}, this).where(field, search, find)
     }
-    async add(data: {[key: string]: any}): Promise<MongoStoreDocumentResponse> {
+    async add(data: Record<string, any> = {}): Promise<MongoStoreDocumentResponse> {
         try{
             const postData =  {
                 action: "add",
