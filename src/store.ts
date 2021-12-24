@@ -84,7 +84,7 @@ export class MongoStoreQuery {
         postParam.action = "get"
         postParam.query = JSON.stringify(postParam.query)
         try{
-            const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
+            const response = await axios.post(this._collection.store.client.config.serverUrl + "/mongostore/store", postParam)
             return new MongoStoreDocumentResponse(response.data, this._collection)
         }catch(err) {
             return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
@@ -96,7 +96,7 @@ export class MongoStoreQuery {
         postParam.data = JSON.stringify(data)
         postParam.query = JSON.stringify(postParam.query)
         try{
-            const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
+            const response = await axios.post(this._collection.store.client.config.serverUrl + "/mongostore/store", postParam)
             return new MongoStoreDocumentResponse(response.data, this._collection)
         }catch(err) {
             return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
@@ -108,7 +108,7 @@ export class MongoStoreQuery {
         postParam.data = JSON.stringify(data)
         postParam.query = JSON.stringify(postParam.query)
         try{
-            const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
+            const response = await axios.post(this._collection.store.client.config.serverUrl + "/mongostore/store", postParam)
             return new MongoStoreDocumentResponse(response.data, this._collection)
         }catch(err) {
             return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
@@ -119,7 +119,7 @@ export class MongoStoreQuery {
         postParam.action = "delete"
         postParam.query = JSON.stringify(postParam.query)
         try{
-            const response = await axios.post(this._collection.store.store.config.serverUrl + "/mongostore/store", postParam)
+            const response = await axios.post(this._collection.store.client.config.serverUrl + "/mongostore/store", postParam)
             return new MongoStoreDocumentResponse(response.data, this._collection)
         }catch(err) {
             return new MongoStoreDocumentResponse({response: "error", error: err}, this._collection)
@@ -187,7 +187,7 @@ export class MongoStoreCollection {
                 collection: this.collectionID,
                 data: JSON.stringify(data)
             }
-            const response = await axios.post(this.store.store.config.serverUrl + "/mongostore/store", postData)
+            const response = await axios.post(this.store.client.config.serverUrl + "/mongostore/store", postData)
             const mongoStoreResponse = new MongoStoreDocumentResponse(response.data, this)
             return mongoStoreResponse
         }catch(err) {
@@ -196,9 +196,9 @@ export class MongoStoreCollection {
     }
 }
 export class MongoStore {
-    store: MongoStoreClient
-    constructor(ms: MongoStoreClient) {
-        this.store = ms
+    private _client: MongoStoreClient
+    constructor(client: MongoStoreClient) {
+        this._client = client
     }
     collection(collectionID: string): MongoStoreCollection {
         return new MongoStoreCollection(collectionID, this)
@@ -212,5 +212,9 @@ export class MongoStore {
                 return "$$__$$SERVER_MILLIS_TIMESTAMP$$__$$"
             }
         }
+    }
+
+    get client(): MongoStoreClient {
+        return this._client
     }
 }

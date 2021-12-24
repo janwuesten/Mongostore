@@ -1,16 +1,25 @@
 import {MongoStore} from './store'
 import axios from 'axios'
+import { MongoStoreFunctions } from './functions'
 
 export class MongoStoreClient {
     config: MongoStoreConfig
+    private _store: MongoStore
+    private _functions: MongoStoreFunctions
+
     constructor() {
         this.config = new MongoStoreConfig()
+        this._store = new MongoStore(this)
+        this._functions = new MongoStoreFunctions(this)
     }
     init(config: MongoStoreConfig) {
         this.config = config
     }
     store(): MongoStore {
-        return new MongoStore(this)
+        return this._store
+    }
+    functions(): MongoStoreFunctions {
+        return this._functions
     }
     async serverInfo(): Promise<{[key: string]: any}|null> {
         try{
